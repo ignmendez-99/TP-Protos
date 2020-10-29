@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>   // TODO: borrar (solo para debuggear está)
 #include "hello_parser.h"
 
 
@@ -6,15 +7,17 @@ void
 hello_parser_init(hello_parser *hp) {
     hp->state = hello_reading_version;
     hp->methods_remaining = 0;
+    hp->methods_index = 0;
+    hp->methods = NULL;
 }
 
 enum hello_state
-consume_buffer(buffer *b, hello_parser *hp) {
+consume_hello_buffer(buffer *b, hello_parser *hp) {
     enum hello_state state = hp->state;  // Le damos un valor por si no se entra en el while
 
     while(buffer_can_read(b)) {
         const uint8_t c = buffer_read(b);
-        state = hello_parser_feed(hp, c);
+        state = parse_single_hello_character(c, hp);
         if(state == hello_finished || state == hello_unsupported_version) {
             break;   // stop reading
         }
@@ -24,7 +27,7 @@ consume_buffer(buffer *b, hello_parser *hp) {
 }
 
 enum hello_state
-parse_single_character(const uint8_t c, hello_parser *hp) {
+parse_single_hello_character(const uint8_t c, hello_parser *hp) {
     switch(hp->state) {
 
         case hello_reading_version:
@@ -40,12 +43,16 @@ parse_single_character(const uint8_t c, hello_parser *hp) {
                 hp->state = hello_finished;
             } else {
                 hp->methods_remaining = c;
+                hp->methods = malloc(c);   // TODO: hacerle free a esto  // TODO: catchear return error
                 hp->state = hello_reading_methods;
             }
             break;
         
         case hello_reading_methods:
-            // TODO: falta pensar esta parte
+            hp->methods[hp->methods_index++] = c;
+            if(hp->methods_index == hp->methods_remaining) {
+                hp->state = hello_finished;
+            }
             break;
         
         case hello_finished:
@@ -73,4 +80,16 @@ hello_marshall(buffer *b, const uint8_t method) {
     where_to_write_next[1] = method;
     buffer_write_adv(b, SPACE_NEEDED_FOR_HELLO_MARSHALL);
     return 0;
+}
+
+void
+print_current_hello_parser(hello_parser *hp) {
+    printf("/************** HELLO PARSER DATA **************/\n");
+    printf("STATE = %d\n", hp->state);
+    printf("METHODS_ARRAY_INDEX = %d\n", hp->methods_index);
+    printf("METHODS_ARRAY_LENGTH = %d\n", hp->methods_remaining);
+    for (uint8_t i = 0; i < hp->methods_remaining; i++){
+        printf("Request parser methods[%d] = %d\n", i, hp->methods[i]);
+    }
+    printf("/***********************************************/\n");
 }

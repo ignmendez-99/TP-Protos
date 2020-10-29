@@ -27,21 +27,23 @@ enum hello_state {
 typedef struct hello_parser {
     enum hello_state state;
     uint8_t methods_remaining;
+    uint8_t *methods;
+    uint8_t methods_index;  // for advancing in the methods array
 } hello_parser;
 
 
-/** inicializa el parser */
+/** inicializa las variables del parser */
 void
 hello_parser_init(hello_parser *hp);
 
 
 /**
- * Dado un buffer, lo consume (lee) hasta que no puede hacerlo más (ya sea porque llegó al final del buffer, 
+ * Dado un buffer, lo consume (lee) hasta que no puede hacerlo más (ya sea porque el buffer no permite leer más,  
  * o porque se llegó al estado 'hello_finished')
  * Retorna el estado en que se encuentra el parser al terminar de consumir el buffer.
  */ 
 enum hello_state
-consume_buffer(buffer *b, hello_parser *hp);
+consume_hello_buffer(buffer *b, hello_parser *hp);
 
 
 /**
@@ -49,7 +51,7 @@ consume_buffer(buffer *b, hello_parser *hp);
  * Retorna el estado en que se encuentra el parser al terminar de parsear el caracter.
  */
 enum hello_state
-parse_single_character(const uint8_t c, hello_parser *hp);
+parse_single_hello_character(const uint8_t c, hello_parser *hp);
 
 
 /**
@@ -60,6 +62,13 @@ parse_single_character(const uint8_t c, hello_parser *hp);
  */
 int
 hello_marshall(buffer *b, const uint8_t method);
+
+
+/**   TODO: no se si esto va a hacer falta una vez que tengamos logging y esas cosas...
+ * Imprime en pantalla el estado del hello_parser
+ */
+void
+print_current_hello_parser(hello_parser *hp);
 
 
 #endif
