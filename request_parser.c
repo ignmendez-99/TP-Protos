@@ -193,7 +193,7 @@ print_current_request_parser(request_parser *rp) {
     printf("DESTINATION_ADDRESS_LENGTH = %d\n", rp->destination_address_length);
     printf("DESTINATION_ADDRESS_INDEX = %d\n", rp->address_index);
     for (uint8_t i = 0; i < rp->destination_address_length; i++){
-        printf("Request parser address[%d] = %d\n", i, rp->destination_address[i]);
+        printf("ADDRESS[%d] = %d\n", i, rp->destination_address[i]);
     }
     printf("REPLY = {code: %d , message: %s}\n", rp->reply->code, rp->reply->description);
     printf("/*************************************************/\n");

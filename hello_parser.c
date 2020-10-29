@@ -88,10 +88,10 @@ void
 print_current_hello_parser(hello_parser *hp) {
     printf("/************** HELLO PARSER DATA **************/\n");
     printf("STATE = %d\n", hp->state);
+    printf("NMETHODS = %d\n", hp->methods_remaining);
     printf("METHODS_ARRAY_INDEX = %d\n", hp->methods_index);
-    printf("METHODS_ARRAY_LENGTH = %d\n", hp->methods_remaining);
     for (uint8_t i = 0; i < hp->methods_remaining; i++){
-        printf("Request parser methods[%d] = %d\n", i, hp->methods[i]);
+        printf("METHOD[%d] = %d\n", i, hp->methods[i]);
     }
     printf("/***********************************************/\n");
 }
