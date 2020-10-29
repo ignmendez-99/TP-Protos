@@ -71,12 +71,12 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             if(c == REQUEST_THROUGH_IPV4) {
                 rp->destination_address_length = 4;
                 // TODO: hacer free() de esto
-                // TODO: catchear return error
+                // TODO: catchear NULL error
                 rp->destination_address = malloc(4 + 1);  // +1 for \0
             } else if(c == REQUEST_THROUGH_IPV6) {
                 rp->destination_address_length = 16;
                 // TODO: hacer free() de esto
-                // TODO: catchear return error
+                // TODO: catchear NULL error
                 rp->destination_address = malloc(16 + 1); // +1 for \0
             } else if(c == REQUEST_THROUGH_FQDN) {
                 // Length is given in next state
@@ -94,7 +94,8 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             if(rp->address_index == 0 && rp->address_type == REQUEST_THROUGH_FQDN) {
                 // reading first byte from FQDN
                 rp->destination_address_length = c;
-                // TODO: hacer free() de esto
+                // TODO: hacer free() de esto  
+                // TODO: catchear posible NULL-return
                 rp->destination_address = malloc(c + 1); // +1 for \0
 
             } else {
