@@ -128,7 +128,7 @@ main(const int argc, const char **argv) {
         err_msg = "registering fd";
         goto finally;
     }
-    for(;!done;) {
+    for(;!done;) {   // Si hago un CTRL+C, "done" pasa a true
         err_msg = NULL;
         ss = selector_select(selector);
         if(ss != SELECTOR_SUCCESS) {

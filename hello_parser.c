@@ -38,7 +38,7 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
             break;
         
         case hello_reading_nmethods:
-            if(c == 0) {
+            if(c <= 0) {
                 // zero methods were given
                 hp->state = hello_finished;
             } else {
@@ -51,6 +51,8 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
             break;
         
         case hello_reading_methods:
+            // TODO: falta ver que algún método que me envió el cliente lo soportemos 
+            //       si no soportamos ninguno de los que nos mandó --> debemos retornar 0xFF
             hp->methods[hp->methods_index++] = c;
             if(hp->methods_index == hp->methods_remaining) {
                 hp->state = hello_finished;
@@ -71,6 +73,11 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
 
 int
 hello_marshall(buffer *b, const uint8_t method) {
+
+    // TODO: nota solo para recordar: nuestro programa principal tendría 2 buffers, uno por cada flujo de
+    //       datos (cliente-servidor y servidor-cliente). Por lo tanto, el buffer que recibe esta función
+    //       seguro va a ser distinto que el buffer que recibieron las otras funciones de este archivo
+    //       (ya que el otro buffer era leído, mientras que este de acá es escrito)
 
     size_t space_left_to_write;
     uint8_t *where_to_write_next = buffer_write_ptr(b, &space_left_to_write);

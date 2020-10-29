@@ -1,114 +1,58 @@
+/**
+ *   Test para probar el funcionamiento de hello_parser.c y request_parser.c
+ *   Este test es más amigable que el que hizo Juan
+ */
 #include <stdio.h>
 #include <stdlib.h>
-#include <check.h>
+#include <stdint.h>
+#include "buffer.h"
+#include "hello_parser.h"
+#include "request_parser.h"
 
-#include "parser.h"
-
-// definición de maquina
-
-enum states {
-    S0,
-    S1
-};
-
-enum event_type {
-    FOO,
-    BAR,
-};
-
-static void
-foo(struct parser_event *ret, const uint8_t c) {
-    ret->type    = FOO;
-    ret->n       = 1;
-    ret->data[0] = c;
-}
-
-static void
-bar(struct parser_event *ret, const uint8_t c) {
-    ret->type    = BAR;
-    ret->n       = 1;
-    ret->data[0] = c;
-}
-
-static const struct parser_state_transition ST_S0 [] =  {
-    {.when = 'F',        .dest = S0,        .act1 = foo,},
-    {.when = 'f',        .dest = S0,        .act1 = foo,},
-    {.when = ANY,        .dest = S1,        .act1 = bar,},
-};
-static const struct parser_state_transition ST_S1 [] =  {
-    {.when = 'F',        .dest = S0,        .act1 = foo,},
-    {.when = 'f',        .dest = S0,        .act1 = foo,},
-    {.when = ANY,        .dest = S1,        .act1 = bar,},
-};
-
-static const struct parser_state_transition *states [] = {
-    ST_S0,
-    ST_S1,
-};
-
-#define N(x) (sizeof(x)/sizeof((x)[0]))
-
-static const size_t states_n [] = {
-    N(ST_S0),
-    N(ST_S1),
-};
-
-static struct parser_definition definition = {
-    .states_count = N(states),
-    .states       = states,
-    .states_n     = states_n,
-    .start_state  = S0,
-};
-
-//// TEST
-
-static void
-assert_eq(const unsigned type, const int c, const struct parser_event *e) {
-    ck_assert_ptr_eq (0,    e->next);
-    ck_assert_uint_eq(1,    e->n);
-    ck_assert_uint_eq(type, e->type);
-    ck_assert_uint_eq(c,    e->data[0]);
-
-}
-
-START_TEST (test_basic) {
-    struct parser *parser = parser_init(parser_no_classes(), &definition);
-    assert_eq(FOO,  'f', parser_feed(parser, 'f'));
-    assert_eq(FOO,  'F', parser_feed(parser, 'F'));
-    assert_eq(BAR,  'B', parser_feed(parser, 'B'));
-    assert_eq(BAR,  'b', parser_feed(parser, 'b'));
-
-    parser_destroy(parser);
-}
-END_TEST
-
-Suite *
-suite(void) {
-    Suite *s;
-    TCase *tc;
-
-    s = suite_create("parser_utils");
-
-    /* Core test case */
-    tc = tcase_create("parser_utils");
-
-    tcase_add_test(tc, test_basic);
-    suite_add_tcase(s, tc);
-
-    return s;
-}
 
 int
 main(void) {
-    int number_failed;
-    Suite *s;
-    SRunner *sr;
 
-    s = suite();
-    sr = srunner_create(s);
+    // HELLO TEST 1
 
-    srunner_run_all(sr, CK_NORMAL);
-    number_failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    buffer* buffer_hello = malloc(sizeof(buffer));
+    uint8_t zona_hello[] = {0x05, 0x01, 0x00};
+    buffer_init(buffer_hello, 100, zona_hello);
+    buffer_write_adv(buffer_hello, sizeof(zona_hello));
+
+    hello_parser *hp = malloc(sizeof(hello_parser));
+    hello_parser_init(hp);
+
+    enum hello_state hs = consume_hello_buffer(buffer_hello, hp);
+    print_current_hello_parser(hp);
+
+
+    // HELLO TEST 2
+
+    buffer* buffer_hello_2 = malloc(sizeof(buffer));
+    uint8_t zona_hello_2[] = {0x05, 0x00};
+    buffer_init(buffer_hello_2, 100, zona_hello_2);
+    buffer_write_adv(buffer_hello_2, sizeof(zona_hello_2));
+
+    hello_parser *hp_2 = malloc(sizeof(hello_parser));
+    hello_parser_init(hp_2);
+
+    enum hello_state hs_2 = consume_hello_buffer(buffer_hello_2, hp_2);
+    print_current_hello_parser(hp_2);
+
+
+    // REQUEST TEST
+
+    buffer* buffer_request = malloc(sizeof(buffer));
+    uint8_t zona_request[] = {0x05, 0x01, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x11, 0x11};
+    buffer_init(buffer_request, 100, zona_request);
+    buffer_write_adv(buffer_request, sizeof(zona_request));
+
+    request_parser *rp = malloc(sizeof(request_parser));
+    request_parser_init(rp);
+
+    enum request_state rs = consume_request_buffer(buffer_request, rp);
+    print_current_request_parser(rp);
+
+    return 0;
 }

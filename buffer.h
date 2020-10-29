@@ -103,22 +103,51 @@ void
 buffer_init(buffer *b, const size_t n, uint8_t *data);
 
 /**
- * Retorna un puntero donde se pueden escribir hasta `*nbytes`.
- * Se debe notificar mediante la función `buffer_write_adv'
+ * @param nbyte: es un parametro de salida. Se guardará ahí la cantidad de bytes que se pueden escribir.
+ * @returns un puntero hacia donde se pueden escribir `*nbytes` 
+ * Se debe notificar mediante la función `buffer_read_adv'
+ * 
+ * Ejemplo:
+ *         R=2
+ *         ↓
+ * +---+---+---+---+---+---+        buffer_write_ptr(b, &salida);
+ * | O | L | A |   |   |   |        devuelve:
+ * +---+---+---+---+---+---+                . un puntero a W
+ *             ↑           ↑                . en salida, devuelve 3
+ *             W=3         limit=6
  */
 uint8_t *
 buffer_write_ptr(buffer *b, size_t *nbyte);
+
+
+/** Avanza el puntero de Write en el buffer, "bytes" posiciones */
 void
 buffer_write_adv(buffer *b, const ssize_t bytes);
 
+/**
+ * @param nbyte: es un parametro de salida. Se guardará ahí la cantidad de bytes que se pueden leer.
+ * @returns un puntero hacia donde se pueden leer `*nbytes` 
+ * Se debe notificar mediante la función `buffer_read_adv'
+ * 
+ * Ejemplo:
+ *         R=2
+ *         ↓
+ * +---+---+---+---+---+---+        buffer_read_ptr(b, &salida);
+ * | O | L | A |   |   |   |        devuelve:
+ * +---+---+---+---+---+---+                . un puntero a R
+ *             ↑           ↑                . en salida, devuelve 1
+ *             W=3         limit=6
+ */
 uint8_t *
 buffer_read_ptr(buffer *b, size_t *nbyte);
+
+
+/** Avanza el puntero de Read en el buffer, "bytes" posiciones */
 void
 buffer_read_adv(buffer *b, const ssize_t bytes);
 
-/**
- * obtiene un byte
- */
+
+/** obtiene un byte */
 uint8_t
 buffer_read(buffer *b);
 
@@ -126,15 +155,11 @@ buffer_read(buffer *b);
 void
 buffer_write(buffer *b, uint8_t c);
 
-/**
- * compacta el buffer
- */
+/** compacta el buffer */
 void
 buffer_compact(buffer *b);
 
-/**
- * Reinicia todos los punteros
- */
+/** Reinicia todos los punteros */
 void
 buffer_reset(buffer *b);
 

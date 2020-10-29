@@ -135,7 +135,7 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
 }
 
 static reply * getReplyBasedOnState(enum request_state state) {
-    reply *r = malloc(sizeof(reply));
+    reply *r = malloc(sizeof(reply));  //TODO: hacer free() de esto  TODO: catchear NULL retorno
 
     switch(state) {
         case request_reading_version:
@@ -167,6 +167,11 @@ static reply * getReplyBasedOnState(enum request_state state) {
 int
 request_marshall(buffer *b, const uint8_t method, request_parser *rp) {
 
+    // TODO: nota solo para recordar: nuestro programa principal tendría 2 buffers, uno por cada flujo de
+    //       datos (cliente-servidor y servidor-cliente). Por lo tanto, el buffer que recibe esta función
+    //       seguro va a ser distinto que el buffer que recibieron las otras funciones de este archivo
+    //       (ya que el otro buffer era leído, mientras que este de acá es escrito)
+
     size_t space_left_to_write;
     uint8_t *where_to_write_next = buffer_write_ptr(b, &space_left_to_write);
     const uint16_t space_needed_for_request_marshall = 1 + 1 + 1 + 1 + rp->destination_address_length + 2;
@@ -180,6 +185,7 @@ request_marshall(buffer *b, const uint8_t method, request_parser *rp) {
     where_to_write_next[3] = rp->address_type;
     // where_to_write_next[4] =  TODO: dependiendo de lo que hizo el proxy, ponemos acá el BND.ADDR correspondiente
     // where_to_write_next[5] =  TODO: dependiendo de lo que hizo el proxy, ponemos acá el BND.PORT correspondiente
+    buffer_write_adv(b, space_needed_for_request_marshall);
     return 0;
 }
 

@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 
 #include "netutils.h"
+//#include "buffer.h"
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -17,6 +18,8 @@ sockaddr_to_human(char *buff, const size_t buffsize,
         strncpy(buff, "null", buffsize);
         return buff;
     }
+
+    // Initialize variables
     in_port_t port;
     void *p = 0x00;
     bool handled = false;
@@ -63,7 +66,7 @@ sock_blocking_write(const int fd, buffer *b) {
 
     do {
         ptr = buffer_read_ptr(b, &n);
-        nwritten = send(fd, ptr, n, MSG_NOSIGNAL);
+        nwritten = send(fd, ptr, n, MSG_NOSIGNAL);   // se bloquea ya que no hicimos nada para prevenirlo !!
         if (nwritten > 0) {
             buffer_read_adv(b, nwritten);
         } else /* if (errno != EINTR) */ {
