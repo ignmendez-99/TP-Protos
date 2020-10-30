@@ -25,7 +25,8 @@
 
 #include "socks5.h"
 #include "selector.h"
-#include "socks5nio.h"
+#include "buffer.h"  // TODO: quizas se vaya
+//#include "socks5nio.h"
 
 static bool done = false;
 
@@ -117,20 +118,26 @@ main(const int argc, const char **argv) {
         err_msg = "unable to create selector";
         goto finally;
     }
-    const struct fd_handler socksv5 = {
+
+    // Definimos los handlers para el socket pasivo
+    const struct fd_handler socksv5_passive_hanlder = {
         .handle_read       = socksv5_passive_accept,
         .handle_write      = NULL,
         .handle_close      = NULL, // nada que liberar
     };
-    ss = selector_register(selector, server, &socksv5,
-                                              OP_READ, NULL);
+
+    // TODO: acá se ve como se registra con un interés de Read. Seguro en Runtime vamos a tener que
+    //       implementar que se pueda cambiar usando selector_set_interest() o selector_set_interest_key()
+
+    ss = selector_register(selector, server, &socksv5_passive_hanlder, OP_READ, NULL);
+
     if(ss != SELECTOR_SUCCESS) {
         err_msg = "registering fd";
         goto finally;
     }
     for(;!done;) {   // Si hago un CTRL+C, "done" pasa a true
         err_msg = NULL;
-        ss = selector_select(selector);
+        ss = selector_select(selector); // Hace una llamada a select() esperando por conexion en socket pasivo
         if(ss != SELECTOR_SUCCESS) {
             err_msg = "serving";
             goto finally;

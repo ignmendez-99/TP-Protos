@@ -1,3 +1,6 @@
+/**
+ *  Archivo de la práctica 0 de Protos. Está bueno solo para mirarlo de vez en cuando
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

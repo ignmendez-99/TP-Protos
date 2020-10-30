@@ -72,12 +72,12 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
                 rp->destination_address_length = 4;
                 // TODO: hacer free() de esto
                 // TODO: catchear NULL error
-                rp->destination_address = malloc(4 + 1);  // +1 for \0
+                rp->destination_address = calloc(4 + 1, sizeof(c));  // +1 for \0
             } else if(c == REQUEST_THROUGH_IPV6) {
                 rp->destination_address_length = 16;
                 // TODO: hacer free() de esto
                 // TODO: catchear NULL error
-                rp->destination_address = malloc(16 + 1); // +1 for \0
+                rp->destination_address = calloc(16 + 1, sizeof(c)); // +1 for \0
             } else if(c == REQUEST_THROUGH_FQDN) {
                 // Length is given in next state
             } else {
@@ -96,7 +96,7 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
                 rp->destination_address_length = c;
                 // TODO: hacer free() de esto  
                 // TODO: catchear posible NULL-return
-                rp->destination_address = malloc(c + 1); // +1 for \0
+                rp->destination_address = calloc(c + 1, sizeof(c)); // +1 for \0
 
             } else {
                 // Save the byte
@@ -135,7 +135,7 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
 }
 
 static reply * getReplyBasedOnState(enum request_state state) {
-    reply *r = malloc(sizeof(reply));  //TODO: hacer free() de esto  TODO: catchear NULL retorno
+    reply *r = calloc(1, sizeof(reply));  //TODO: hacer free() de esto  TODO: catchear NULL retorno
 
     switch(state) {
         case request_reading_version:

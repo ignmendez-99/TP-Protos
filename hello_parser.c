@@ -45,7 +45,7 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
                 hp->methods_remaining = c;
                 // TODO: hacerle free a esto  
                 // TODO: catchear return error
-                hp->methods = malloc(c);   
+                hp->methods = calloc(c, sizeof(c));   
                 hp->state = hello_reading_methods;
             }
             break;
