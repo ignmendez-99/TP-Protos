@@ -162,13 +162,11 @@ selector_unregister_fd(fd_selector   s,
                        const int     fd);
 
 /** permite cambiar los intereses para un file descriptor */
-// TODO: me suena que esto se va a tener que hacer para cambiar variabls en Runtime
 selector_status
 selector_set_interest(fd_selector s, int fd, fd_interest i);
 
 
 /** permite cambiar los intereses para un file descriptor */
-// TODO: me suena que esto se va a tener que hacer para cambiar variabls en Runtime
 selector_status
 selector_set_interest_key(struct selector_key *key, fd_interest i);
 

@@ -1,5 +1,5 @@
-#ifndef HELLO_PARSER_H  // TODO: poner un hash aca para que quede mas PRO
-#define HELLO_PARSER_H   // TODO: idem arriba
+#ifndef HELLO_PARSER_H_68f9cbe0499150288c6b905552e201fb15e0b420
+#define HELLO_PARSER_H_68f9cbe0499150288c6b905552e201fb15e0b420
 
 #include "buffer.h"
 #include <stdint.h>
@@ -20,8 +20,9 @@ enum hello_state {
     hello_reading_version,
     hello_reading_nmethods,
     hello_reading_methods,
-    hello_finished,           // El mensaje de hello terminó
-    hello_unsupported_version // Error leyendo la versión
+    hello_finished,            // El mensaje de hello terminó
+    hello_unsupported_version, // Error leyendo la versión
+    hello_server_error         // Error general al parsear hello
 };
 
 typedef struct hello_parser {
@@ -64,7 +65,7 @@ int
 hello_marshall(buffer *b, const uint8_t method);
 
 
-/**   TODO: no se si esto va a hacer falta una vez que tengamos logging y esas cosas...
+/**   TODO: cuando tengamos logging, quizas esta funcion desaparezca...
  * Imprime en pantalla el estado del hello_parser
  */
 void

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <stdio.h>   // TODO: borrar (solo para debuggear está)
+#include <stdio.h>   // used by print_current_request_parser()
 #include "request_parser.h"
 
 // Prototypes
@@ -44,8 +44,8 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             if(c == PROXY_SOCKS_REQUEST_SUPPORTED_VERSION)
                 rp->state = request_reading_command;
             else {
+                rp->reply = getReplyBasedOnState(rp->state);
                 rp->state = request_has_error;
-                rp->reply = getReplyBasedOnState(request_reading_version);
             }
             break;
 
@@ -53,8 +53,8 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             if(c == CONNECT_COMMAND)
                 rp->state = request_reading_reserved;
             else {
+                rp->reply = getReplyBasedOnState(rp->state);
                 rp->state = request_has_error;
-                rp->reply = getReplyBasedOnState(request_reading_command);
             }
             break;
         
@@ -62,8 +62,8 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             if(c == PROXY_SOCKS_REQUEST_RESERVED)
                 rp->state = request_reading_address_type;
             else {
+                rp->reply = getReplyBasedOnState(rp->state);
                 rp->state = request_has_error;
-                rp->reply = getReplyBasedOnState(request_reading_reserved);
             }
             break;
         
@@ -71,18 +71,24 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             if(c == REQUEST_THROUGH_IPV4) {
                 rp->destination_address_length = 4;
                 // TODO: hacer free() de esto
-                // TODO: catchear NULL error
                 rp->destination_address = calloc(4 + 1, sizeof(c));  // +1 for \0
+                if(rp->destination_address == NULL) {
+                    rp->state = request_has_error;
+                    rp->reply = getReplyBasedOnState(rp->state);
+                }
             } else if(c == REQUEST_THROUGH_IPV6) {
                 rp->destination_address_length = 16;
                 // TODO: hacer free() de esto
-                // TODO: catchear NULL error
                 rp->destination_address = calloc(16 + 1, sizeof(c)); // +1 for \0
+                if(rp->destination_address == NULL) {
+                    rp->state = request_has_error;
+                    rp->reply = getReplyBasedOnState(rp->state);
+                }
             } else if(c == REQUEST_THROUGH_FQDN) {
                 // Length is given in next state
             } else {
+                rp->reply = getReplyBasedOnState(rp->state);
                 rp->state = request_has_error;
-                rp->reply = getReplyBasedOnState(request_reading_address_type);
                 break;
             }
             
@@ -95,9 +101,11 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
                 // reading first byte from FQDN
                 rp->destination_address_length = c;
                 // TODO: hacer free() de esto  
-                // TODO: catchear posible NULL-return
                 rp->destination_address = calloc(c + 1, sizeof(c)); // +1 for \0
-
+                if(rp->destination_address == NULL) {
+                    rp->state = request_has_error;
+                    rp->reply = getReplyBasedOnState(rp->state);
+                }
             } else {
                 // Save the byte
                 rp->destination_address[rp->address_index++] = c;
@@ -120,11 +128,11 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
             break;
         
         case request_finished:
-            rp->reply = getReplyBasedOnState(request_finished);
-            break;
-        
         case request_has_error:
-            rp->reply = getReplyBasedOnState(request_has_error);
+            rp->reply = getReplyBasedOnState(rp->state);
+            if(rp->reply == NULL) {
+                rp->state = request_has_error;
+            }
             break;
         
         default:
@@ -135,7 +143,11 @@ parse_single_request_character(const uint8_t c, request_parser *rp) {
 }
 
 static reply * getReplyBasedOnState(enum request_state state) {
-    reply *r = calloc(1, sizeof(reply));  //TODO: hacer free() de esto  TODO: catchear NULL retorno
+
+    reply *r = calloc(1, sizeof(reply));  //TODO: hacer free() de esto
+    if(r == NULL) {
+        return NULL;
+    }
 
     switch(state) {
         case request_reading_version:
@@ -166,12 +178,6 @@ static reply * getReplyBasedOnState(enum request_state state) {
 
 int
 request_marshall(buffer *b, const uint8_t method, request_parser *rp) {
-
-    // TODO: nota solo para recordar: nuestro programa principal tendría 2 buffers, uno por cada flujo de
-    //       datos (cliente-servidor y servidor-cliente). Por lo tanto, el buffer que recibe esta función
-    //       seguro va a ser distinto que el buffer que recibieron las otras funciones de este archivo
-    //       (ya que el otro buffer era leído, mientras que este de acá es escrito)
-
     size_t space_left_to_write;
     uint8_t *where_to_write_next = buffer_write_ptr(b, &space_left_to_write);
     const uint16_t space_needed_for_request_marshall = 1 + 1 + 1 + 1 + rp->destination_address_length + 2;

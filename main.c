@@ -23,7 +23,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 
-#include "socks5.h"
+#include "socks5_server.h"
 #include "selector.h"
 #include "buffer.h"  // TODO: quizas se vaya
 //#include "socks5nio.h"
@@ -125,9 +125,6 @@ main(const int argc, const char **argv) {
         .handle_write      = NULL,
         .handle_close      = NULL, // nada que liberar
     };
-
-    // TODO: acá se ve como se registra con un interés de Read. Seguro en Runtime vamos a tener que
-    //       implementar que se pueda cambiar usando selector_set_interest() o selector_set_interest_key()
 
     ss = selector_register(selector, server, &socksv5_passive_hanlder, OP_READ, NULL);
 

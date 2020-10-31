@@ -1,5 +1,5 @@
-#ifndef REQUEST_PARSER_H  // TODO: poner un hash aca para que quede mas PRO
-#define REQUEST_PARSER_H  // TODO: idem arriba
+#ifndef REQUEST_PARSER_H_68f9cbe0499150288c6b905552e201fb15e0b420
+#define REQUEST_PARSER_H_68f9cbe0499150288c6b905552e201fb15e0b420
 
 #include "buffer.h"
 #include <stdint.h>
@@ -20,29 +20,6 @@ typedef struct reply {
     uint8_t code;
      uint8_t *description;
 } reply;
-// Todos las posibles respuestas al Request
-static  reply succeded_reply = {0x00, "Succeded"};
-static  reply gen_socks_serv_fail_reply = {0x01, "General socks server failure"};
-static  reply conn_not_allow_by_ruleset_reply = {0x02, "Connection not allowed by ruleset"};
-static  reply net_unreachable_reply = {0x03, "Network unreachable"};
-static  reply host_unreachable_reply = {0x04, "Host unreachable"};
-static  reply conn_refused_reply = {0x05, "Connection refused"};
-static  reply ttl_exp_reply = {0x06, "TTL expired"};
-static  reply cmd_not_supported_reply = {0x07, "Command not supported"};
-static  reply addr_type_not_supported_reply = {0x08, "Address type not supported"};
-
-
-// enum reply_code {
-//     SUCCEDED = 0x00,
-//     GENERAL_SOCKS_SERVER_FAILURE = 0x01,
-//     CONNECTION_NOT_ALLOWED_BY_RULESET = 0x02,
-//     NETWORK_UNREACHABLE = 0x03,
-//     HOST_UNREACHABLE = 0x04,
-//     CONNECTION_REFUSED = 0x05,
-//     TTL_EXPIRED = 0x06,
-//     COMMAND_NOT_SUPPORTED = 0x07,
-//     ADDRESS_TYPE_NOT_SUPPORTED = 0x08
-// };
 
 
 // Los posibles estados en los que se puede encontrar el parser de request

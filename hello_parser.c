@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <stdio.h>   // TODO: borrar (solo para debuggear está)
+#include <stdio.h>   // used by print_current_hello_parser()
 #include "hello_parser.h"
 
 
@@ -42,10 +42,11 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
                 // zero methods were given
                 hp->state = hello_finished;
             } else {
-                hp->methods_remaining = c;
-                // TODO: hacerle free a esto  
-                // TODO: catchear return error
-                hp->methods = calloc(c, sizeof(c));   
+                hp->methods_remaining = c; 
+                hp->methods = calloc(c, sizeof(c)); // TODO: hacerle free a esto 
+                if(hp->methods == NULL) {
+                    hp->state = hello_server_error;
+                }
                 hp->state = hello_reading_methods;
             }
             break;
@@ -61,6 +62,7 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
         
         case hello_finished:
         case hello_unsupported_version:
+        case hello_server_error:
             // return these states now
             break;
             
@@ -73,12 +75,6 @@ parse_single_hello_character(const uint8_t c, hello_parser *hp) {
 
 int
 hello_marshall(buffer *b, const uint8_t method) {
-
-    // TODO: nota solo para recordar: nuestro programa principal tendría 2 buffers, uno por cada flujo de
-    //       datos (cliente-servidor y servidor-cliente). Por lo tanto, el buffer que recibe esta función
-    //       seguro va a ser distinto que el buffer que recibieron las otras funciones de este archivo
-    //       (ya que el otro buffer era leído, mientras que este de acá es escrito)
-
     size_t space_left_to_write;
     uint8_t *where_to_write_next = buffer_write_ptr(b, &space_left_to_write);
     if(space_left_to_write < SPACE_NEEDED_FOR_HELLO_MARSHALL) {
